@@ -1,0 +1,16 @@
+# Java
+target/
+*.class
+*.log
+*.iml
+.idea/
+*.jar
+
+# Node / Vue
+node_modules/
+dist/
+.env.local
+.DS_Store
+
+# System files
+Thumbs.db

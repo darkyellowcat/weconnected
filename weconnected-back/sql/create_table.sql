@@ -1,11 +1,8 @@
-# 数据库初始化
-# @author <a href="https://github.com/liyupi">程序员鱼皮</a>
-# @from <a href="https://yupi.icu">编程导航知识星球</a>
 create
-database if not exists yupao;
+database if not exists weconnected;
 
 use
-yupao;
+weconnected;
 
 -- 用户表
 create table user
@@ -25,7 +22,6 @@ create table user
     updateTime   datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     isDelete     tinyint  default 0 not null comment '是否删除',
     userRole     int      default 0 not null comment '用户角色 0 - 普通用户 1 - 管理员',
-    planetCode   varchar(512) null comment '星球编号',
     tags         varchar(1024) null comment '标签 json 列表'
 ) comment '用户';
 
@@ -57,25 +53,6 @@ create table user_team
     updateTime datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     isDelete   tinyint  default 0 not null comment '是否删除'
 ) comment '用户队伍关系';
-
-
--- 标签表（可以不创建，因为标签字段已经放到了用户表中）
-create table tag
-(
-    id         bigint auto_increment comment 'id'
-        primary key,
-    tagName    varchar(256) null comment '标签名称',
-    userId     bigint null comment '用户 id',
-    parentId   bigint null comment '父标签 id',
-    isParent   tinyint null comment '0 - 不是, 1 - 父标签',
-    createTime datetime default CURRENT_TIMESTAMP null comment '创建时间',
-    updateTime datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    isDelete   tinyint  default 0 not null comment '是否删除',
-    constraint uniIdx_tagName
-        unique (tagName)
-) comment '标签';
-
-# https://t.zsxq.com/0emozsIJh
 
 create index idx_userId
     on tag (userId);
