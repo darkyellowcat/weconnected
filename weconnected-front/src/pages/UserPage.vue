@@ -14,18 +14,6 @@ import myAxios from "../plugins/myAxios";
 import {Toast} from "vant";
 import {getCurrentUser} from "../services/user";
 
-// const user = {
-//   id: 1,
-//   username: '鱼皮',
-//   userAccount: 'dogYupi',
-//   avatarUrl: 'https://636f-codenav-8grj8px727565176-1256524210.tcb.qcloud.la/img/logo.png',
-//   gender: '男',
-//   phone: '123112312',
-//   email: '12345@qq.com',
-//   planetCode: '1234',
-//   createTime: new Date(),
-// }
-
 const user = ref();
 
 const router = useRouter();
