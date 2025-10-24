@@ -39,7 +39,7 @@
 ---
 
 ## 功能展示
-后续会更新到博客中
+后续会更新到博客中 https://darkyellowcat.github.io/2025/10/20/weconnected%E9%A1%B9%E7%9B%AE/
 
 <img width="500" height="879" alt="image" src="https://github.com/user-attachments/assets/e920cc8c-f164-4b4e-9547-79700d70303c" />
 
