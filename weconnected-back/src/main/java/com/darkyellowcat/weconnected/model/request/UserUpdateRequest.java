@@ -1,4 +1,19 @@
 package com.darkyellowcat.weconnected.model.request;
 
-public class UserUpdateRequest {
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+public class UserUpdateRequest implements Serializable {
+
+    private static final long serialVersionUID = 3191241716373120793L;
+
+    private Long id;
+
+    private String username;
+
+    private String avatarUrl;
+
+    private int gender;
 }

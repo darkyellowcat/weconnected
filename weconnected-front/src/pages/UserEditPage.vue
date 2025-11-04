@@ -27,7 +27,8 @@ const router = useRouter();
 const editUser = ref({
   editKey: route.query.editKey,
   currentValue: route.query.currentValue,
-  editName: route.query.editName,
+  // editName: route.query.editName,
+  editName: route.query.editName ?? '内容',
 })
 
 const onSubmit = async () => {
