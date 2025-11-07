@@ -20,7 +20,10 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -80,6 +83,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
+        // 模板默认填充（保留用户输入，这里仅有账户与密码）
+        String defaultUsername = "用户" + userAccount;
+        user.setUsername(defaultUsername);
+        // 动态生成默认头像 URL（DiceBear / UI Avatars）
+        String seed = null;
+        try {
+            seed = URLEncoder.encode(defaultUsername,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "URL 编码失败");
+        }
+        String provider = UserConstant.AVATAR_PROVIDER;
+        String avatarUrl;
+        if ("ui-avatars".equalsIgnoreCase(provider)) {
+            avatarUrl = String.format(UserConstant.UI_AVATARS_URL_TEMPLATE, seed);
+        } else {
+            avatarUrl = String.format(UserConstant.DICEBEAR_URL_TEMPLATE, seed);
+        }
+        user.setAvatarUrl(avatarUrl);
+        user.setGender(UserConstant.DEFAULT_GENDER);
+        user.setPhone("");
+        user.setEmail("");
+        user.setProfile(UserConstant.DEFAULT_PROFILE);
+        user.setTags(UserConstant.DEFAULT_TAGS_JSON);
+        user.setUserStatus(0);
+        user.setUserRole(UserConstant.DEFAULT_ROLE);
         boolean saveResult = this.save(user);
         if (!saveResult) {
             return -1;
