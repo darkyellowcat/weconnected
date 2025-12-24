@@ -23,7 +23,7 @@
 | 分类 | 技术 |
 |------|------|
 | 前端 | Vue 3、Axios、Vue Router、Vite |
-| 后端 | Spring Boot 3、MyBatis、MySQL、Redis |
+| 后端 | Spring Boot 2、MyBatis、MySQL、Redis |
 | 安全 | 盐值、MD5加密 |
 | 工具 | Knife4j、Lombok、Maven |
 | 部署 | 前端：Vercel(免费) 后端：云托管平台(微信云托管) |
@@ -32,7 +32,7 @@
 
 ## 🚀 功能模块
 
-- 👤 用户模块：注册、登录、资料修改、头像上传  
+- 👤 用户模块：注册、登录、资料修改、根据名称生成头像 
 - 🗨️ 动态模块：组队、获得联系方式  
 - 📖 接口文档：集成 Swagger + Knife4j，可视化查看 API  
 
