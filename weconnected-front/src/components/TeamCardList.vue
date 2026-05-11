@@ -41,6 +41,10 @@
         <van-button v-if="team.userId === currentUser?.id" size="small" type="danger" plain
                     @click="doDeleteTeam(team.id)">解散队伍
         </van-button>
+        <!-- 进入聊天室 -->
+        <van-button v-if="team.hasJoin || team.userId === currentUser?.id" size="small" type="success" plain
+                    @click="goToChat(team)">进入聊天
+        </van-button>
       </template>
     </van-card>
     <van-dialog v-model:show="showPasswordDialog" title="请输入密码" show-cancel-button @confirm="doJoinTeam" @cancel="doJoinCancel">
@@ -101,7 +105,7 @@ const doJoinTeam = async () => {
   if (!joinTeamId.value) {
     return;
   }
-  const res = await myAxios.post('/team/join', {
+  const res = await myAxios.post('/api/team/join', {
     teamId: joinTeamId.value,
     password: password.value
   });
@@ -131,7 +135,7 @@ const doUpdateTeam = (id: number) => {
  * @param id
  */
 const doQuitTeam = async (id: number) => {
-  const res = await myAxios.post('/team/quit', {
+  const res = await myAxios.post('/api/team/quit', {
     teamId: id
   });
   if (res?.code === 0) {
@@ -146,7 +150,7 @@ const doQuitTeam = async (id: number) => {
  * @param id
  */
 const doDeleteTeam = async (id: number) => {
-  const res = await myAxios.post('/team/delete', {
+  const res = await myAxios.post('/api/team/delete', {
     id,
   });
   if (res?.code === 0) {
@@ -154,6 +158,20 @@ const doDeleteTeam = async (id: number) => {
   } else {
     Toast.fail('操作失败' + (res.description ? `，${res.description}` : ''));
   }
+}
+
+/**
+ * 进入聊天室
+ * @param team
+ */
+const goToChat = (team: TeamType) => {
+  router.push({
+    path: '/team/chat',
+    query: {
+      teamId: team.id,
+      teamName: team.name,
+    }
+  })
 }
 
 </script>

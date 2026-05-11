@@ -54,7 +54,7 @@ const teamList = ref([]);
  * @returns {Promise<void>}
  */
 const listTeam = async (val = '', status = 0) => {
-  const res = await myAxios.get("/team/list", {
+  const res = await myAxios.get("/api/team/list", {
     params: {
       searchText: val,
       pageNum: 1,

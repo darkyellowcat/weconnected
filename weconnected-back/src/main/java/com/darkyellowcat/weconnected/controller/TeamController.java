@@ -38,7 +38,6 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/team")
-@CrossOrigin(origins = {"http://localhost:3000"})
 @Slf4j
 public class TeamController {
 
@@ -77,7 +76,7 @@ public class TeamController {
     }
 
     @GetMapping("/get")
-    public BaseResponse<Team> getTeamById(long id) {
+    public BaseResponse<TeamUserVO> getTeamById(long id) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -85,7 +84,9 @@ public class TeamController {
         if (team == null) {
             throw new BusinessException(ErrorCode.NULL_ERROR);
         }
-        return ResultUtils.success(team);
+        TeamUserVO teamUserVO = new TeamUserVO();
+        BeanUtils.copyProperties(team, teamUserVO);
+        return ResultUtils.success(teamUserVO);
     }
 
     @GetMapping("/list")
@@ -111,6 +112,7 @@ public class TeamController {
                 team.setHasJoin(hasJoin);
             });
         } catch (Exception e) {
+            log.debug("用户未登录，跳过 hasJoin 标记");
         }
         // 3、查询已加入队伍的人数
         QueryWrapper<UserTeam> userTeamJoinQueryWrapper = new QueryWrapper<>();

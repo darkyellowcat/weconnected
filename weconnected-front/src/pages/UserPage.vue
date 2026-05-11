@@ -5,6 +5,9 @@
     <van-cell title="我创建的队伍" is-link to="/user/team/create" />
     <van-cell title="我加入的队伍" is-link to="/user/team/join" />
   </template>
+  <van-empty v-else description="请先登录">
+    <van-button round type="primary" @click="goToLogin">去登录</van-button>
+  </van-empty>
 </template>
 
 <script setup lang="ts">
@@ -21,6 +24,10 @@ const router = useRouter();
 onMounted(async () => {
   user.value = await getCurrentUser();
 })
+
+const goToLogin = () => {
+  router.push('/user/login');
+}
 
 const toEdit = (editKey: string, editName: string, currentValue: string) => {
   router.push({

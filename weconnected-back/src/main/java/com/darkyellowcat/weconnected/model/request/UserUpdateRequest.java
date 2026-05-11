@@ -15,5 +15,13 @@ public class UserUpdateRequest implements Serializable {
 
     private String avatarUrl;
 
-    private int gender;
+    private Integer gender;
+
+    private String phone;
+
+    private String email;
+
+    private String profile;
+
+    private String tags;
 }

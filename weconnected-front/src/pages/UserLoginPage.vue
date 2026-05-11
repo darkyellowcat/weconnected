@@ -38,18 +38,25 @@ const userAccount = ref('');
 const userPassword = ref('');
 
 const onSubmit = async () => {
-  const res = await myAxios.post('/user/login', {
-    userAccount: userAccount.value,
-    userPassword: userPassword.value,
-  })
-  console.log(res, '用户登录');
-  if (res.code === 0 && res.data) {
-    Toast.success('登录成功');
-    // 跳转到之前的页面
-    const redirectUrl = route.query?.redirect as string ?? '/';
-    window.location.href = redirectUrl;
-  } else {
-    Toast.fail('登录失败');
+  try {
+    const res: any = await myAxios.post('/api/user/login', {
+      userAccount: userAccount.value,
+      userPassword: userPassword.value,
+    });
+    if (res.code === 0 && res.data) {
+      Toast.success('登录成功');
+      const redirectUrl = route.query?.redirect as string ?? '/';
+      const decoded = decodeURIComponent(redirectUrl);
+      if (decoded.startsWith('/') && !decoded.startsWith('//')) {
+        router.push(decoded);
+      } else {
+        router.push('/');
+      }
+    } else {
+      Toast.fail(res.description || '登录失败');
+    }
+  } catch (e: any) {
+    Toast.fail(e.message || '请求失败');
   }
 };
 

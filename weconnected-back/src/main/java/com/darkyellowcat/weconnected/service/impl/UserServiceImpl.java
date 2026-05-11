@@ -14,6 +14,7 @@ import com.darkyellowcat.weconnected.utils.AlgorithmUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.util.Pair;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -43,8 +44,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Resource
     private UserMapper userMapper;
 
+    @Resource
+    private PasswordEncoder passwordEncoder;
+
     /**
-     * 盐值，混淆密码
+     * 盐值，混淆密码（BCrypt 不需要手动加盐，保留此常量用于兼容旧数据）
      */
     private static final String SALT = "darkyellowcat";
 
@@ -77,8 +81,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (count > 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
         }
-        // 2. 加密
-        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+        // 2. 加密（使用 BCrypt）
+        String encryptPassword = passwordEncoder.encode(userPassword);
         // 3. 插入数据
         User user = new User();
         user.setUserAccount(userAccount);
@@ -134,16 +138,39 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (matcher.find()) {
             return null;
         }
-        // 2. 加密
-        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
-        // 查询用户是否存在
+        // 2. 查询用户
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount", userAccount);
-        queryWrapper.eq("userPassword", encryptPassword);
         User user = userMapper.selectOne(queryWrapper);
         // 用户不存在
         if (user == null) {
-            log.info("user login failed, userAccount cannot match userPassword");
+            log.info("user login failed, userAccount does not exist");
+            return null;
+        }
+        // 3. 验证密码（支持 BCrypt 和旧 MD5 格式）
+        boolean passwordMatch = false;
+        String storedPassword = user.getUserPassword();
+        
+        // 尝试 BCrypt 验证
+        if (storedPassword != null && storedPassword.startsWith("$2a$")) {
+            // BCrypt 格式
+            passwordMatch = passwordEncoder.matches(userPassword, storedPassword);
+        } else {
+            // 旧 MD5 格式（兼容老数据）
+            String md5Password = org.springframework.util.DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+            passwordMatch = md5Password.equals(storedPassword);
+            
+            // 如果是旧密码且验证成功，升级为 BCrypt
+            if (passwordMatch) {
+                String bcryptPassword = passwordEncoder.encode(userPassword);
+                user.setUserPassword(bcryptPassword);
+                userMapper.updateById(user);
+                log.info("User {} password upgraded from MD5 to BCrypt", userAccount);
+            }
+        }
+        
+        if (!passwordMatch) {
+            log.info("user login failed, password incorrect");
             return null;
         }
         // 3. 用户脱敏
@@ -307,6 +334,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Gson gson = new Gson();
         List<String> tagList = gson.fromJson(tags, new TypeToken<List<String>>() {
         }.getType());
+        if (tagList == null || tagList.isEmpty()) {
+            return new ArrayList<>();
+        }
         // 用户列表的下标 => 相似度
         List<Pair<User, Long>> list = new ArrayList<>();
         // 依次计算所有用户和当前用户的相似度

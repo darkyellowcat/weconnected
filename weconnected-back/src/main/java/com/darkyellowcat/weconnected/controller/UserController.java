@@ -9,6 +9,7 @@ import com.darkyellowcat.weconnected.exception.BusinessException;
 import com.darkyellowcat.weconnected.model.domain.User;
 import com.darkyellowcat.weconnected.model.request.UserLoginRequest;
 import com.darkyellowcat.weconnected.model.request.UserRegisterRequest;
+import com.darkyellowcat.weconnected.model.request.UserUpdateRequest;
 import com.darkyellowcat.weconnected.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +33,6 @@ import static com.darkyellowcat.weconnected.constant.UserConstant.USER_LOGIN_STA
  */
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:3000"})
 @Slf4j
 public class UserController {
 
@@ -58,7 +58,7 @@ public class UserController {
         String checkPassword = userRegisterRequest.getCheckPassword();
 
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long result = userService.userRegister(userAccount, userPassword, checkPassword);
         return ResultUtils.success(result);
@@ -168,7 +168,7 @@ public class UserController {
     @GetMapping("/recommend")
     public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
-        String redisKey = String.format("weconnected:user:recommend:%s", loginUser.getId());
+        String redisKey = String.format("weconnected:user:recommend:%s:%s:%s", loginUser.getId(), pageNum, pageSize);
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
         // 如果有缓存，直接读缓存
         Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
@@ -195,12 +195,20 @@ public class UserController {
      * @return
      */
     @PostMapping("/update")
-    public BaseResponse<Integer> updateUser(@RequestBody User user, HttpServletRequest request) {
-        // 校验参数是否为空
-        if (user == null) {
+    public BaseResponse<Integer> updateUser(@RequestBody UserUpdateRequest userUpdateRequest, HttpServletRequest request) {
+        if (userUpdateRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
+        User user = new User();
+        user.setId(userUpdateRequest.getId());
+        user.setUsername(userUpdateRequest.getUsername());
+        user.setAvatarUrl(userUpdateRequest.getAvatarUrl());
+        user.setGender(userUpdateRequest.getGender());
+        user.setPhone(userUpdateRequest.getPhone());
+        user.setEmail(userUpdateRequest.getEmail());
+        user.setProfile(userUpdateRequest.getProfile());
+        user.setTags(userUpdateRequest.getTags());
         int result = userService.updateUser(user, loginUser);
         return ResultUtils.success(result);
     }

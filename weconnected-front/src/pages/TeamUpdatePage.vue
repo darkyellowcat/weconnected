@@ -88,7 +88,7 @@ onMounted(async () => {
     Toast.fail('加载队伍失败');
     return;
   }
-  const res = await myAxios.get("/team/get", {
+  const res = await myAxios.get("/api/team/get", {
     params: {
       id,
     }
@@ -107,7 +107,7 @@ const onSubmit = async () => {
     status: Number(addTeamData.value.status)
   }
   // todo 前端参数校验
-  const res = await myAxios.post("/team/update", postData);
+  const res = await myAxios.post("/api/team/update", postData);
   if (res?.code === 0 && res.data){
     Toast.success('更新成功');
     router.push({
@@ -115,7 +115,7 @@ const onSubmit = async () => {
       replace: true,
     });
   } else {
-    Toast.success('更新失败');
+    Toast.fail('更新失败');
   }
 }
 </script>

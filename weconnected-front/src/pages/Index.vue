@@ -26,48 +26,45 @@ const loading = ref(true);
 const loadData = async () => {
   let userListData;
   loading.value = true;
-  // 心动模式，根据标签匹配用户
-  if (isMatchMode.value) {
-    const num = 10;
-    userListData = await myAxios.get('/user/match', {
-      params: {
-        num,
-      },
-    })
-        .then(function (response) {
-          console.log('/user/match succeed', response);
-          return response?.data;
-        })
-        .catch(function (error) {
-          console.error('/user/match error', error);
-          Toast.fail('请求失败');
-        })
-  } else {
-    // 普通模式，直接分页查询用户
-    userListData = await myAxios.get('/user/recommend', {
-      params: {
-        pageSize: 8,
-        pageNum: 1,
-      },
-    })
-        .then(function (response) {
-          console.log('/user/recommend succeed', response);
-          return response?.data?.records;
-        })
-        .catch(function (error) {
-          console.error('/user/recommend error', error);
-          Toast.fail('请求失败');
-        })
+  try {
+    // 心动模式，根据标签匹配用户
+    if (isMatchMode.value) {
+      const num = 10;
+      const response: any = await myAxios.get('/api/user/match', {
+        params: { num },
+      });
+      console.log('/user/match succeed', response);
+      userListData = response?.data;
+    } else {
+      // 普通模式，直接分页查询用户
+      const response: any = await myAxios.get('/api/user/recommend', {
+        params: {
+          pageSize: 8,
+          pageNum: 1,
+        },
+      });
+      console.log('/user/recommend succeed', response);
+      userListData = response?.data?.records;
+    }
+    
+    if (userListData) {
+      userListData.forEach((user: UserType) => {
+        if (user.tags) {
+          user.tags = JSON.parse(user.tags);
+        }
+      })
+      userList.value = userListData;
+    }
+  } catch (error) {
+    console.error('加载数据失败:', error);
+    // 如果是 401 错误，不显示 Toast，让拦截器处理跳转
+    // 其他错误才显示提示
+    if (error.response && error.response.status !== 401) {
+      Toast.fail('请求失败');
+    }
+  } finally {
+    loading.value = false;
   }
-  if (userListData) {
-    userListData.forEach((user: UserType) => {
-      if (user.tags) {
-        user.tags = JSON.parse(user.tags);
-      }
-    })
-    userList.value = userListData;
-  }
-  loading.value = false;
 }
 
 watchEffect(() => {

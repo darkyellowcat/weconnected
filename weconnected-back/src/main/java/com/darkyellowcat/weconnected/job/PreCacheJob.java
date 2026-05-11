@@ -49,7 +49,7 @@ public class PreCacheJob {
                 for (Long userId : mainUserList) {
                     QueryWrapper<User> queryWrapper = new QueryWrapper<>();
                     Page<User> userPage = userService.page(new Page<>(1, 20), queryWrapper);
-                    String redisKey = String.format("weconnected:user:recommend:%s", userId);
+                    String redisKey = String.format("weconnected:user:recommend:%s:%s:%s", userId, 1, 20);
                     ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
                     // 写缓存
                     try {
